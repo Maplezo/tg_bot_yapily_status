@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 import threading
 from datetime import datetime, timezone
 import telebot
@@ -211,6 +212,13 @@ def monitor_loop():
                     if inc_id not in current_incidents:
                         send_to_group(format_resolved_alert(old_data["name"], old_data["status"]))
 
+                if old_incidents and not current_incidents and not components:
+                    send_to_group(
+                        f"✅ <b>Все шлюзы работают нормально</b>\n"
+                        f"🕐 {now_str()}\n\n"
+                        f"Активных инцидентов и проблем не обнаружено."
+                    )
+
                 storage.update_notified_incidents(
                     {inc_id: {"status": inc["status"], "name": inc["name"]}
                      for inc_id, inc in current_incidents.items()}
@@ -274,4 +282,8 @@ if __name__ == '__main__':
     )
 
     print("✅ Bot is running. Listening for commands...")
-    bot.infinity_polling()
+    bot.infinity_polling(
+        timeout=30,
+        long_polling_timeout=30,
+        logger_level=logging.WARNING,
+    )
