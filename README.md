@@ -76,6 +76,71 @@ python3 main.py
 
 ---
 
+## 🐧 Запуск как systemd-демон (Linux)
+
+Чтобы бот запускался автоматически при старте сервера и перезапускался при сбоях, настройте его как systemd-сервис.
+
+### 1. Создайте файл сервиса
+
+```bash
+sudo nano /etc/systemd/system/yapily-bot.service
+```
+
+Вставьте содержимое (замените `/root/Yapily_bot` на ваш реальный путь):
+
+```ini
+[Unit]
+Description=Yapily Status Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/Yapily_bot
+ExecStart=/root/Yapily_bot/venv/bin/python3 /root/Yapily_bot/main.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/root/Yapily_bot/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 2. Активируйте и запустите сервис
+
+```bash
+# Перечитать конфигурацию systemd
+sudo systemctl daemon-reload
+
+# Включить автозапуск при старте системы
+sudo systemctl enable yapily-bot
+
+# Запустить сервис прямо сейчас
+sudo systemctl start yapily-bot
+```
+
+### 3. Проверка статуса и логов
+
+```bash
+# Статус сервиса
+sudo systemctl status yapily-bot
+
+# Логи в реальном времени
+sudo journalctl -u yapily-bot -f
+
+# Последние 100 строк логов
+sudo journalctl -u yapily-bot -n 100
+```
+
+### 4. Управление сервисом
+
+```bash
+sudo systemctl stop yapily-bot      # остановить
+sudo systemctl restart yapily-bot   # перезапустить
+sudo systemctl disable yapily-bot   # убрать из автозапуска
+```
+
+---
+
 ## 📋 Как это выглядит в Telegram
 
 ### Запрос `/status` при наличии проблем:
